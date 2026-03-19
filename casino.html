@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ A Gift For You</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fdf6ec;
+    --gold: #c9993a;
+    --gold-light: #f0c96a;
+    --deep: #1a0e00;
+    --ribbon: #c0392b;
+    --ribbon-dark: #922b21;
+    --shadow: rgba(26,14,0,0.18);
+    --reel-bg: #1a0e00;
+    --win: #27ae60;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Warm paper texture via SVG */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Scattered confetti dots */
+  .confetti-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  }
+  .confetti-bg span {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 1px;
+    opacity: 0.13;
+  }
+
+  /* ─── GIFT SCENE ─── */
+  #gift-scene {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  #gift-scene .hint {
+    font-size: 1.05rem;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    margin-bottom: 28px;
+    opacity: 0.85;
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:0.6} 50%{opacity:1} }
+
+  /* Gift SVG wrapper */
+  .gift-wrap {
+    position: relative;
+    width: 220px; height: 220px;
+    filter: drop-shadow(0 18px 38px var(--shadow));
+    transition: transform 0.18s ease;
+  }
+  #gift-scene:hover .gift-wrap { transform: scale(1.04) rotate(-1deg); }
+  #gift-scene:active .gift-wrap { transform: scale(0.97); }
+
+  /* Lid flies off */
+  .gift-lid {
+    transition: transform 0.7s cubic-bezier(.3,1.6,.5,1), opacity 0.5s ease;
+    transform-origin: center bottom;
+  }
+  .gift-lid.open {
+    transform: translateY(-160px) rotate(-18deg) scale(1.1);
+    opacity: 0;
+  }
+
+  /* Box shakes on hover */
+  @keyframes wiggle {
+    0%,100%{transform:rotate(0)} 20%{transform:rotate(-2.5deg)} 40%{transform:rotate(2.5deg)} 60%{transform:rotate(-1.5deg)} 80%{transform:rotate(1.5deg)}
+  }
+  #gift-scene:hover .gift-body { animation: wiggle 0.5s ease; }
+
+  /* ─── SLOT MACHINE SCENE ─── */
+  #slot-scene {
+    position: relative; z-index: 1;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    animation: riseUp 0.9s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes riseUp {
+    from { opacity:0; transform: translateY(60px) scale(0.88); }
+    to   { opacity:1; transform: translateY(0) scale(1); }
+  }
+
+  /* Dark velvet background when slot is showing */
+  #slot-scene::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at 50% 40%, #1c0a0a 0%, #050200 100%);
+    z-index: -1;
+    animation: bgFadeIn 1s ease both;
+  }
+  @keyframes bgFadeIn { from{opacity:0} to{opacity:1} }
+
+  /* Ambient cigarette smoke particles */
+  .smoke {
+    position: fixed;
+    bottom: 0;
+    width: 3px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    pointer-events: none;
+    z-index: 0;
+    animation: smokeRise linear infinite;
+  }
+  @keyframes smokeRise {
+    0%   { transform: translateY(0) scaleX(1); opacity:0; }
+    20%  { opacity:1; }
+    100% { transform: translateY(-100vh) scaleX(8); opacity:0; }
+  }
+
+  /* Neon sign title */
+  .machine-title {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.7rem;
+    color: #fff;
+    letter-spacing: 0.06em;
+    margin-bottom: 20px;
+    position: relative;
+    text-shadow:
+      0 0 6px #fff,
+      0 0 20px #ff3c3c,
+      0 0 40px #cc0000,
+      0 0 80px #880000;
+    animation: neonFlicker 4s ease-in-out infinite;
+  }
+  @keyframes neonFlicker {
+    0%,96%,100% { opacity:1; }
+    97% { opacity:0.7; }
+    98% { opacity:1; }
+    99% { opacity:0.5; }
+  }
+
+  /* Machine outer cabinet */
+  .machine-cabinet {
+    position: relative;
+    background: linear-gradient(160deg, #1a0808 0%, #0d0404 60%, #1a0a00 100%);
+    border-radius: 18px 18px 28px 28px;
+    padding: 6px;
+    box-shadow:
+      0 0 0 2px #5a2800,
+      0 0 0 4px #2a1000,
+      inset 0 2px 8px rgba(255,160,60,0.06),
+      0 30px 80px rgba(0,0,0,0.7);
+  }
+
+  .machine-body {
+    background: linear-gradient(175deg, #1f0d0d 0%, #120808 100%);
+    border-radius: 14px 14px 22px 22px;
+    padding: 22px 26px 20px;
+    border: 2px solid #4a1f00;
+    position: relative;
+    overflow: visible;
+  }
+
+  /* Gold filigree top bar */
+  .machine-topbar {
+    position: absolute;
+    top: -2px; left: -2px; right: -2px;
+    height: 8px;
+    background: linear-gradient(90deg, #5a2800, #c9993a, #f0c96a, #c9993a, #f0c96a, #c9993a, #5a2800);
+    border-radius: 14px 14px 0 0;
+  }
+
+  /* Corner ornaments */
+  .machine-body::before, .machine-body::after {
+    content: '✦';
+    position: absolute;
+    color: var(--gold);
+    font-size: 0.9rem;
+    top: 14px;
+    opacity: 0.7;
+    text-shadow: 0 0 8px rgba(201,153,58,0.6);
+  }
+  .machine-body::before { left: 14px; }
+  .machine-body::after  { right: 14px; }
+
+  /* Reel panel */
+  .reels-panel {
+    background: #080302;
+    border-radius: 10px;
+    padding: 8px;
+    border: 2px solid #3a1800;
+    margin-bottom: 4px;
+    box-shadow: inset 0 4px 20px rgba(0,0,0,0.8), 0 0 30px rgba(200,80,0,0.06);
+    position: relative;
+  }
+
+  /* Payline indicators */
+  .payline {
+    position: absolute;
+    left: -8px; right: -8px;
+    top: 50%; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(201,153,58,0.6), rgba(240,201,106,0.9), rgba(201,153,58,0.6), transparent);
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 10;
+    box-shadow: 0 0 8px rgba(240,201,106,0.4);
+  }
+  .payline::before, .payline::after {
+    content: '◀';
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    font-size: 0.6rem;
+    color: var(--gold-light);
+  }
+  .payline::before { left: 2px; content: '▶'; }
+  .payline::after  { right: 2px; content: '◀'; }
+
+  .reels-container {
+    display: flex;
+    gap: 8px;
+    position: relative;
+  }
+
+  .reel-window {
+    width: 86px; height: 96px;
+    overflow: hidden;
+    border-radius: 6px;
+    border: 1px solid #3a1800;
+    position: relative;
+    background: #05020e;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
+  }
+
+  /* Vignette on each reel */
+  .reel-window::after {
+    content:'';
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom,
+      rgba(0,0,0,0.7) 0%,
+      transparent 28%,
+      transparent 72%,
+      rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .reel-track {
+    display: flex;
+    flex-direction: column;
+    will-change: transform;
+  }
+
+  .reel-symbol {
+    width: 86px; height: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.6rem;
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+  }
+
+  /* Blur top/bottom symbols slightly */
+  .reel-symbol:first-child,
+  .reel-symbol:last-child {
+    filter: blur(1.5px) drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+    opacity: 0.5;
+  }
+
+  /* CSS spinning: fast scrolling via keyframes */
+  @keyframes reelSpin {
+    from { transform: translateY(0); }
+    to   { transform: translateY(calc(-96px * 10)); }
+  }
+  .spinning .reel-track {
+    animation: reelSpin 0.4s linear infinite;
+  }
+
+  /* Reel separator chrome */
+  .reel-divider {
+    width: 4px;
+    background: linear-gradient(to bottom, #2a1000, #5a2800, #2a1000);
+    border-radius: 2px;
+    align-self: stretch;
+  }
+
+  /* Bottom chrome panel */
+  .machine-chrome {
+    background: linear-gradient(to bottom, #1a0808, #0d0404);
+    border-radius: 0 0 18px 18px;
+    padding: 18px 26px 20px;
+    border: 2px solid #3a1400;
+    border-top: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* Credit display */
+  .credit-display {
+    background: #000;
+    border: 1px solid #3a1400;
+    border-radius: 6px;
+    padding: 4px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: #ff6b35;
+    text-shadow: 0 0 8px rgba(255,107,53,0.7);
+    text-transform: uppercase;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Spin button — big red casino button */
+  .spin-btn {
+    background: radial-gradient(circle at 40% 30%, #ff4444, #aa0000 60%, #660000);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 72px; height: 72px;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow:
+      0 6px 0 #3a0000,
+      0 8px 20px rgba(180,0,0,0.5),
+      inset 0 2px 4px rgba(255,120,120,0.4);
+    transition: transform 0.1s, box-shadow 0.1s, opacity 0.2s;
+    position: relative;
+  }
+  .spin-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 #3a0000, 0 12px 28px rgba(180,0,0,0.6), inset 0 2px 4px rgba(255,120,120,0.4);
+  }
+  .spin-btn:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #3a0000, 0 4px 12px rgba(180,0,0,0.4), inset 0 2px 4px rgba(255,120,120,0.4);
+  }
+  .spin-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* Handle / lever */
+  .machine-lever {
+    position: absolute;
+    right: -50px; top: 30px;
+    display: flex; flex-direction: column; align-items: center;
+    cursor: pointer;
+  }
+  .lever-track {
+    width: 8px; height: 90px;
+    background: linear-gradient(to right, #3a1800, #8a4a00, #3a1800);
+    border-radius: 4px;
+    border: 1px solid #5a2800;
+    position: relative;
+  }
+  .lever-ball {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ff8080, #880000);
+    border: 2px solid #5a0000;
+    box-shadow: 0 4px 12px rgba(200,0,0,0.5);
+    position: absolute;
+    top: -4px; left: 50%;
+    transform: translateX(-50%);
+    transition: top 0.15s ease;
+  }
+  .lever-ball.pulled { top: 68px; }
+
+  .spins-left {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: #ff6b35;
+    text-shadow: 0 0 6px rgba(255,107,53,0.5);
+    text-align: center;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Jackpot overlay */
+  #jackpot-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    z-index: 100;
+    background: radial-gradient(ellipse at 50% 50%, rgba(80,0,0,0.96) 0%, rgba(5,2,0,0.98) 100%);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+  .jackpot-crown { font-size: 3rem; animation: crownBounce 0.8s ease infinite alternate; }
+  @keyframes crownBounce { from{transform:translateY(0) rotate(-5deg)} to{transform:translateY(-10px) rotate(5deg)} }
+
+  .jackpot-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 8vw, 5rem);
+    color: #fff;
+    text-align: center;
+    line-height: 1.1;
+    text-shadow:
+      0 0 10px #fff,
+      0 0 30px #ffd700,
+      0 0 60px #ff8c00,
+      0 0 100px #ff4500;
+    animation: jackpotPop 0.7s cubic-bezier(.3,1.8,.4,1) both;
+    letter-spacing: 0.05em;
+  }
+  @keyframes jackpotPop {
+    from{transform:scale(0.2) rotate(-12deg); opacity:0}
+    to{transform:scale(1) rotate(0); opacity:1}
+  }
+
+  .jackpot-amount {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    color: var(--gold-light);
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 20px rgba(240,201,106,0.7), 0 0 40px rgba(240,201,106,0.3);
+    animation: jackpotPop 0.9s cubic-bezier(.3,1.8,.4,1) 0.3s both;
+  }
+  #jackpotCounter {
+    display: inline-block;
+    min-width: 3ch;
+    text-align: right;
+  }
+
+  .jackpot-italian {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: rgba(255,200,100,0.85);
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+
+
+  /* Coin rain */
+  .coin {
+    position: fixed;
+    animation: coinFall linear forwards;
+    pointer-events: none;
+    z-index: 99;
+  }
+  @keyframes coinFall {
+    from { transform: translateY(-80px) rotate(0deg) scale(1); opacity:1; }
+    to   { transform: translateY(110vh) rotate(900deg) scale(0.5); opacity:0; }
+  }
+
+  /* Remove cursor:pointer from jackpot — no dismiss */
+  #jackpot-overlay { cursor: default; }
+
+  /* Jackpot amount counter */
+  .jackpot-amount {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    color: var(--gold-light);
+    text-shadow: 0 0 20px rgba(240,201,106,0.7);
+    letter-spacing: 0.04em;
+  }
+
+  /* Minor reward overlay */
+  #minor-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    z-index: 100;
+    background: rgba(5,2,0,0.93);
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.4s ease;
+  }
+  .minor-inner {
+    background: linear-gradient(170deg, #1a0808, #0d0404);
+    border: 2px solid var(--gold);
+    border-radius: 18px;
+    padding: 32px 36px;
+    max-width: 400px;
+    width: 90vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 0 0 6px rgba(201,153,58,0.1), 0 30px 80px rgba(0,0,0,0.7);
+    animation: jackpotPop 0.6s cubic-bezier(.3,1.6,.4,1) both;
+  }
+  .minor-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    color: var(--gold-light);
+    text-shadow: 0 0 12px rgba(240,201,106,0.5);
+    text-transform: uppercase;
+  }
+  .minor-img {
+    width: 100%;
+    border-radius: 10px;
+    border: 2px solid #3a1800;
+    object-fit: cover;
+  }
+  .minor-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: rgba(255,220,160,0.8);
+    line-height: 1.65;
+    text-align: center;
+  }
+  .minor-close {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--deep);
+    border: none;
+    border-radius: 50px;
+    padding: 11px 36px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(201,153,58,0.35);
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .minor-close:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,153,58,0.45); }
+</style>
+</head>
+<body>
+
+<div class="confetti-bg" id="confettiBg"></div>
+
+<!-- ══ GIFT SCENE ══ -->
+<div id="gift-scene" onclick="openGift()">
+  <div class="hint">✦ Klik på gaven for at åbne ✦</div>
+  <div class="gift-wrap">
+    <svg viewBox="0 0 220 220" width="220" height="220" xmlns="http://www.w3.org/2000/svg">
+      <!-- Shadow -->
+      <ellipse cx="110" cy="210" rx="70" ry="10" fill="rgba(26,14,0,0.18)"/>
+
+      <!-- Box body -->
+      <g class="gift-body">
+        <rect x="30" y="110" width="160" height="100" rx="6" fill="#d4a843"/>
+        <rect x="30" y="110" width="160" height="100" rx="6" fill="url(#boxGrad)"/>
+        <!-- Vertical ribbon on box -->
+        <rect x="97" y="110" width="26" height="100" fill="#c0392b" opacity="0.85"/>
+        <!-- Horizontal ribbon on box -->
+        <rect x="30" y="148" width="160" height="24" fill="#c0392b" opacity="0.85"/>
+        <!-- Box sheen -->
+        <rect x="30" y="110" width="60" height="100" rx="6" fill="white" opacity="0.05"/>
+      </g>
+
+      <!-- Lid -->
+      <g class="gift-lid">
+        <!-- Lid base -->
+        <rect x="22" y="88" width="176" height="30" rx="5" fill="#e8b94a"/>
+        <rect x="22" y="88" width="176" height="30" rx="5" fill="url(#lidGrad)"/>
+        <!-- Vertical ribbon on lid -->
+        <rect x="97" y="88" width="26" height="30" fill="#c0392b" opacity="0.9"/>
+        <!-- Lid sheen -->
+        <rect x="22" y="88" width="60" height="30" rx="5" fill="white" opacity="0.06"/>
+
+        <!-- Bow loops left -->
+        <ellipse cx="83" cy="78" rx="30" ry="18" fill="#e74c3c" transform="rotate(-30 83 78)"/>
+        <ellipse cx="83" cy="78" rx="30" ry="18" fill="url(#bowLGrad)" transform="rotate(-30 83 78)"/>
+
+        <!-- Bow loops right -->
+        <ellipse cx="137" cy="78" rx="30" ry="18" fill="#e74c3c" transform="rotate(30 137 78)"/>
+        <ellipse cx="137" cy="78" rx="30" ry="18" fill="url(#bowRGrad)" transform="rotate(30 137 78)"/>
+
+        <!-- Bow center knot -->
+        <ellipse cx="110" cy="80" rx="14" ry="11" fill="#c0392b"/>
+        <ellipse cx="110" cy="80" rx="14" ry="11" fill="url(#knotGrad)"/>
+
+        <!-- Ribbon tails -->
+        <path d="M96 88 Q80 110 68 130" stroke="#e74c3c" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M124 88 Q140 110 152 130" stroke="#e74c3c" stroke-width="8" fill="none" stroke-linecap="round"/>
+      </g>
+
+      <!-- Stars / sparkles -->
+      <g opacity="0.7">
+        <text x="18" y="60" font-size="16" fill="#f0c96a">✦</text>
+        <text x="190" y="80" font-size="12" fill="#f0c96a">✦</text>
+        <text x="6" y="150" font-size="10" fill="#f0c96a">✧</text>
+        <text x="200" y="170" font-size="14" fill="#f0c96a">✧</text>
+      </g>
+
+      <defs>
+        <linearGradient id="boxGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f0c96a" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#9a7020" stop-opacity="0.4"/>
+        </linearGradient>
+        <linearGradient id="lidGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#fde99a" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#c9993a" stop-opacity="0.3"/>
+        </linearGradient>
+        <radialGradient id="bowLGrad" cx="40%" cy="35%">
+          <stop offset="0%" stop-color="#ff7c7c"/>
+          <stop offset="100%" stop-color="#922b21" stop-opacity="0.6"/>
+        </radialGradient>
+        <radialGradient id="bowRGrad" cx="60%" cy="35%">
+          <stop offset="0%" stop-color="#ff7c7c"/>
+          <stop offset="100%" stop-color="#922b21" stop-opacity="0.6"/>
+        </radialGradient>
+        <radialGradient id="knotGrad" cx="40%" cy="30%">
+          <stop offset="0%" stop-color="#f0a0a0"/>
+          <stop offset="100%" stop-color="#7a1a14"/>
+        </radialGradient>
+      </defs>
+    </svg>
+  </div>
+</div>
+
+<!-- ══ SLOT MACHINE SCENE ══ -->
+<div id="slot-scene">
+  <div class="machine-title">🎰 Il Casino di Don Bibse</div>
+
+  <div class="machine-cabinet">
+    <div class="machine-body" id="machineBody">
+      <div class="machine-topbar"></div>
+
+      <!-- Lever -->
+      <div class="machine-lever" id="leverEl" onclick="spin()">
+        <div class="lever-track">
+          <div class="lever-ball" id="leverBall"></div>
+        </div>
+      </div>
+
+      <div class="reels-panel">
+        <div class="payline"></div>
+        <div class="reels-container">
+          <div class="reel-window" id="reel0">
+            <div class="reel-track" id="track0"></div>
+          </div>
+          <div class="reel-divider"></div>
+          <div class="reel-window" id="reel1">
+            <div class="reel-track" id="track1"></div>
+          </div>
+          <div class="reel-divider"></div>
+          <div class="reel-window" id="reel2">
+            <div class="reel-track" id="track2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="machine-chrome">
+      <div class="credit-display" id="creditDisplay">◆ Credits: 500 ◆</div>
+      <button class="spin-btn" id="spinBtn" onclick="spin()">SPIN</button>
+      <div class="spins-left" id="spinsLeft">10 spins tilbage</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MINOR REWARD OVERLAY (spin 5) ══ -->
+<div id="minor-overlay" style="display:none; position:fixed; inset:0; z-index:90; background:rgba(5,2,0,0.92); flex-direction:column; align-items:center; justify-content:center; gap:20px; animation:fadeIn 0.4s ease;">
+  <div style="background:linear-gradient(160deg,#1f0d0d,#120808); border:2px solid var(--gold); border-radius:18px; padding:32px 36px; max-width:380px; width:90%; display:flex; flex-direction:column; align-items:center; gap:18px; box-shadow:0 0 60px rgba(201,153,58,0.15);">
+    <div style="font-family:'Playfair Display',serif; font-style:italic; font-size:1.1rem; color:var(--gold-light); letter-spacing:0.1em; text-align:center; text-shadow:0 0 12px rgba(240,201,106,0.4);">🎲 Piccola Fortuna 🎲</div>
+    <img src="https://placehold.co/320x180/1a0808/c9993a?text=Placeholder+Image" alt="Reward" style="width:100%; border-radius:10px; border:1px solid #3a1800;">
+    <p style="font-family:'DM Mono',monospace; font-size:0.78rem; color:#c8a87a; line-height:1.75; text-align:center; letter-spacing:0.03em;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vehicula augue at nisl facilisis, vel tincidunt libero fermentum. Donec euismod felis nec arcu dignissim, a varius nulla malesuada.</p>
+    <button onclick="closeMinor()" style="background:linear-gradient(135deg,var(--gold),var(--gold-light)); color:#1a0e00; border:none; border-radius:50px; padding:11px 36px; font-family:'DM Mono',monospace; font-size:0.78rem; font-weight:500; letter-spacing:0.18em; text-transform:uppercase; cursor:pointer; box-shadow:0 4px 16px rgba(201,153,58,0.3);">Continua →</button>
+  </div>
+</div>
+
+<!-- ══ JACKPOT OVERLAY ══ -->
+<div id="jackpot-overlay" style="display:none; position:fixed; inset:0; z-index:100; background:radial-gradient(ellipse at 50% 50%, rgba(80,0,0,0.97) 0%, rgba(5,2,0,0.99) 100%); flex-direction:column; align-items:center; justify-content:center; gap:16px; animation:fadeIn 0.4s ease;">
+  <div class="jackpot-crown">👑</div>
+  <div class="jackpot-text">Jackpot!</div>
+  <div class="jackpot-amount">Gevinst: <span id="jackpotCounter">0</span> kr</div>
+  <div class="jackpot-italian">Mamma mia... hai vinto tutto.</div>
+</div>
+
+<script>
+  // ── Confetti bg ──
+  const bg = document.getElementById('confettiBg');
+  const dotColors = ['#c9993a','#e74c3c','#f0c96a','#d4a843','#922b21'];
+  for (let i = 0; i < 40; i++) {
+    const s = document.createElement('span');
+    s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;background:${dotColors[i%dotColors.length]};transform:rotate(${Math.random()*90}deg)`;
+    bg.appendChild(s);
+  }
+
+  // ── Smoke ambiance ──
+  function addSmoke() {
+    const smk = document.createElement('div');
+    smk.className = 'smoke';
+    smk.style.cssText = `left:${20+Math.random()*60}%;width:${2+Math.random()*4}px;height:${40+Math.random()*60}px;animation-duration:${8+Math.random()*10}s;animation-delay:${Math.random()*4}s;`;
+    document.body.appendChild(smk);
+    setTimeout(() => smk.remove(), 20000);
+  }
+
+  // ── Gift open ──
+  function openGift() {
+    const lid = document.querySelector('.gift-lid');
+    lid.classList.add('open');
+    setTimeout(() => {
+      document.getElementById('gift-scene').style.display = 'none';
+      document.getElementById('confettiBg').style.display = 'none';
+      const slot = document.getElementById('slot-scene');
+      slot.style.display = 'flex';
+      initReels();
+      for (let i = 0; i < 6; i++) setTimeout(addSmoke, i * 800);
+      setInterval(addSmoke, 3000);
+    }, 750);
+  }
+
+  // ── Slot Machine ──
+  const SYMBOLS     = ['🍋','🍒','🃏','🎲','💣','🥃'];
+  const JACKPOT_SYM = '🎁';
+  const MINOR_SYM   = '⭐'; // two-of-a-kind hint on spin 5
+  const REEL_H      = 96;
+  const TOTAL_SPINS = 10;
+  let spinsLeft     = TOTAL_SPINS;
+  let spinsUsed     = 0;
+  let isSpinning    = false;
+  let credits       = 500;
+
+  function buildTrack(centerSym) {
+    const pad = () => SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+    return [pad(), centerSym, pad()];
+  }
+
+  function setTrack(trackEl, symbols) {
+    trackEl.innerHTML = '';
+    symbols.forEach(sym => {
+      const div = document.createElement('div');
+      div.className = 'reel-symbol';
+      div.textContent = sym;
+      trackEl.appendChild(div);
+    });
+    trackEl.style.transform = `translateY(-${REEL_H}px)`;
+    trackEl.style.transition = 'none';
+  }
+
+  function initReels() {
+    for (let i = 0; i < 3; i++) {
+      setTrack(document.getElementById('track' + i), buildTrack(SYMBOLS[i % SYMBOLS.length]));
+    }
+    updateUI();
+  }
+
+  function updateUI() {
+    const el = document.getElementById('spinsLeft');
+    el.textContent = spinsLeft > 0
+      ? `${spinsLeft} spin${spinsLeft !== 1 ? 's' : ''} tilbage`
+      : '0 spins tilbage';
+    document.getElementById('creditDisplay').textContent = `◆ Credits: ${credits} ◆`;
+  }
+
+  function spin() {
+    if (isSpinning || spinsLeft <= 0) return;
+    isSpinning = true;
+    spinsUsed++;
+    spinsLeft--;
+    credits -= 50;
+    const btn = document.getElementById('spinBtn');
+    btn.disabled = true;
+
+    const ball = document.getElementById('leverBall');
+    ball.classList.add('pulled');
+    setTimeout(() => ball.classList.remove('pulled'), 600);
+
+    updateUI();
+
+    const isJackpot = spinsUsed === TOTAL_SPINS;   // spin 10
+    const isMinor   = spinsUsed === 5;             // spin 5
+
+    let finals;
+    if (isJackpot) {
+      finals = [JACKPOT_SYM, JACKPOT_SYM, JACKPOT_SYM];
+    } else if (isMinor) {
+      // Two matching + one different (minor reward feel)
+      const sym = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+      let other;
+      do { other = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]; } while (other === sym);
+      finals = [sym, sym, other];
+    } else {
+      // Guarantee no triple match and no jackpot symbol
+      do {
+        finals = SYMBOLS.map(() => SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]);
+      } while (finals[0] === finals[1] && finals[1] === finals[2]);
+    }
+
+    const windows = [0,1,2].map(i => document.getElementById('reel' + i));
+    windows.forEach(w => w.classList.add('spinning'));
+
+    [900, 1350, 1800].forEach((t, i) => {
+      setTimeout(() => {
+        windows[i].classList.remove('spinning');
+        setTrack(document.getElementById('track' + i), buildTrack(finals[i]));
+      }, t);
+    });
+
+    setTimeout(() => {
+      isSpinning = false;
+      if (isJackpot) {
+        credits += 5000;
+        updateUI();
+        triggerJackpot();
+      } else if (isMinor) {
+        credits += 100;
+        updateUI();
+        triggerMinor();
+      } else {
+        btn.disabled = false;
+        updateUI();
+      }
+    }, 2100);
+  }
+
+  // ── Minor reward ──
+  function triggerMinor() {
+    document.getElementById('minor-overlay').style.display = 'flex';
+  }
+
+  function closeMinor() {
+    document.getElementById('minor-overlay').style.display = 'none';
+    document.getElementById('spinBtn').disabled = false;
+  }
+
+  // ── Jackpot ──
+  function triggerJackpot() {
+    document.getElementById('machineBody').classList.add('jackpot-glow');
+    setTimeout(() => {
+      rainCoins();
+      document.getElementById('jackpot-overlay').style.display = 'flex';
+      animateCounter(0, 500, 2200, document.getElementById('jackpotCounter'));
+    }, 500);
+  }
+
+  function animateCounter(from, to, duration, el) {
+    const start = performance.now();
+    function step(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(from + (to - from) * eased);
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function rainCoins() {
+    const emojis = ['🪙','💰','💵','🎊','⭐','✨','🎁'];
+    for (let i = 0; i < 70; i++) {
+      setTimeout(() => {
+        const coin = document.createElement('div');
+        coin.className = 'coin';
+        coin.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        const size = 1.2 + Math.random() * 1.6;
+        const dur  = 1.6 + Math.random() * 2.2;
+        coin.style.cssText = `left:${Math.random()*100}vw;top:-60px;font-size:${size}rem;animation-duration:${dur}s;animation-delay:${Math.random()*1.2}s;`;
+        document.body.appendChild(coin);
+        setTimeout(() => coin.remove(), (dur + 1.5) * 1000);
+      }, i * 40);
+    }
+  }
+
+  // Jackpot overlay is permanent — no dismiss
+</script>
+</body>
+</html>
